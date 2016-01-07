@@ -90,6 +90,7 @@
     <ClCompile Include="GeneratedFiles\Release\moc_trademark.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="handleImg.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="trademark.cpp" />
   </ItemGroup>

@@ -6,6 +6,7 @@
 #include <qlabel.h>
 #include <qpixmap.h>
 #include "ui_trademark.h"
+#include "handleImg.h"
 
 class TradeMark : public QMainWindow
 {
@@ -16,14 +17,29 @@ public:
 	~TradeMark();
 
 private slots:
-	void handleButton0();
+	void handleButtonLeft();
+	void handleButtonRight();
+	void handleButtonLoad();
+	void handleButtonReWater();
+	void handleButtonCut();
 
+	String imageName();
+	void showImg();
 
 private:
 
 	Ui::TradeMarkClass ui;
-	QPushButton *m_button0;
+	QPushButton *m_buttonLeft;
+	QPushButton *m_buttonRight;
+	QPushButton *m_buttonLoad;
+	QPushButton *m_buttonReWater;
+	QPushButton *m_buttonCut;
 	QLabel *label;
+
+	HandleImg hi;
+
+	int type;	//0:origin, 1:remove water mark, 
+	int num;
 
 };
 

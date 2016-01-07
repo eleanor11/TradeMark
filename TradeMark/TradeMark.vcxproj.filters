@@ -50,6 +50,9 @@
     <ClCompile Include="GeneratedFiles\qrc_trademark.cpp">
       <Filter>Generated Files</Filter>
     </ClCompile>
+    <ClCompile Include="handleImg.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="trademark.h">
