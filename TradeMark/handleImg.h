@@ -73,5 +73,6 @@ public:
 private: 
 		vector<Mat> images;
 		vector<Mat> newImages;
+		vector<std::list<int>> imageRows;
 
 };

@@ -3,6 +3,8 @@
 
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/qpushbutton.h>
+#include <QtWidgets/qtextedit.h>
+#include <QTextCodec>
 #include <qlabel.h>
 #include <qpixmap.h>
 #include "ui_trademark.h"
@@ -23,9 +25,6 @@ private slots:
 	void handleButtonCut();
 	void handleButtonGetInfo();
 
-	void loadImages();
-	String imageName();
-	void showImg();
 
 private:
 
@@ -37,10 +36,34 @@ private:
 	QPushButton *m_buttonGetInfo;
 	QLabel *label;
 
+	QLabel *l_number;
+	QTextEdit *e_number;
+	QLabel *l_date;
+	QTextEdit *e_date;
+	QLabel *l_logo;
+	QLabel *l_logoImage;
+	QLabel *l_content;
+	QLabel *l_class;
+	QTextEdit *e_class; 
+	QLabel *l_applicant;
+	QTextEdit *e_applicant;
+	QLabel *l_address;
+	QTextEdit *e_address;
+	QLabel *l_agency;
+	QTextEdit *e_agency;
+	QLabel *l_priority;
+	QTextEdit *e_priority;
+
+
 	HandleImg hi;
 
 	int type;	//0:origin, 1:remove water mark, 
 	int num;
+
+	void loadImages();
+	String imageName(int type);
+	void showImg(int type);
+	void showMessage();
 
 };
 
