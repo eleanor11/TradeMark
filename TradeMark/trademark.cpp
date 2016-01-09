@@ -13,20 +13,20 @@ TradeMark::TradeMark(QWidget *parent)
 	label = new QLabel(this);
 	label->setGeometry(QRect(QPoint(10, 10), QSize(380, 580)));
 	
+	loadImages();
 
-
-	QPushButton *m_buttonLeft = new QPushButton("<", this);;
-	QPushButton *m_buttonRight = new QPushButton(">", this);;
-	QPushButton *m_buttonLoad = new QPushButton("Load Image", this);
+	QPushButton *m_buttonLeft = new QPushButton("<", this);
+	QPushButton *m_buttonRight = new QPushButton(">", this);
 	QPushButton *m_buttonReWater = new QPushButton("Remove WaterMark", this);
 	QPushButton *m_buttonCut = new QPushButton("Cut Trade Marker", this);
+	QPushButton *m_buttonGetInfo = new QPushButton("Get Infomation", this);
 
-	m_buttonLoad->setGeometry(QRect(QPoint(410, 30), QSize(120, 50)));
-	connect(m_buttonLoad, SIGNAL(pressed()), this, SLOT(handleButtonLoad()));
-	m_buttonReWater->setGeometry(QRect(QPoint(540, 30), QSize(120, 50)));
+	m_buttonReWater->setGeometry(QRect(QPoint(410, 30), QSize(120, 50)));
 	connect(m_buttonReWater, SIGNAL(pressed()), this, SLOT(handleButtonReWater()));
-	m_buttonCut->setGeometry(QRect(QPoint(670, 30), QSize(120, 50)));
+	m_buttonCut->setGeometry(QRect(QPoint(540, 30), QSize(120, 50)));
 	connect(m_buttonCut, SIGNAL(pressed()), this, SLOT(handleButtonCut()));
+	m_buttonGetInfo->setGeometry(QRect(QPoint(670, 30), QSize(120, 50)));
+	connect(m_buttonGetInfo, SIGNAL(pressed()), this, SLOT(handleButtonGetInfo()));
 
 
 	m_buttonLeft->setGeometry(QRect(QPoint(410, 100), QSize(150, 30)));
@@ -38,6 +38,16 @@ TradeMark::TradeMark(QWidget *parent)
 TradeMark::~TradeMark()
 {
 
+}
+
+
+void TradeMark::loadImages() {
+
+	hi.loadImages();
+	type = 0;
+	num = 0;
+
+	showImg();
 }
 
 void TradeMark::handleButtonLeft() {
@@ -62,14 +72,6 @@ void TradeMark::handleButtonRight() {
 	showImg();
 }
 
-void TradeMark::handleButtonLoad() {
-
-	hi.loadImages();
-	type = 0;
-	num = 0;
-
-	showImg();
-}
 
 void TradeMark::handleButtonReWater() {
 
@@ -82,7 +84,7 @@ void TradeMark::handleButtonReWater() {
 }
 
 void TradeMark::handleButtonCut() {
-	//string str = hi.cutImages("imgs/1456_11_168EB22AA1F9501EE053640B503A501E_column2.png");
+	//string str = hi.getInfo("marker_12.png");
 	//QImage *image = new QImage(QString(str.c_str()));
 	//*image = image->scaled(380, 580);
 	//label->setPixmap(QPixmap::fromImage(*image));
@@ -92,6 +94,10 @@ void TradeMark::handleButtonCut() {
 	type = 6;
 
 	showImg();
+}
+
+void TradeMark::handleButtonGetInfo() {
+
 }
 
 String TradeMark::imageName() {

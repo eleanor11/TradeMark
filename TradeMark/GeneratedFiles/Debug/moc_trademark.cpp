@@ -19,8 +19,8 @@
 
 QT_BEGIN_MOC_NAMESPACE
 struct qt_meta_stringdata_TradeMark_t {
-    QByteArrayData data[10];
-    char stringdata[124];
+    QByteArrayData data[11];
+    char stringdata[138];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -33,17 +33,18 @@ QT_MOC_LITERAL(0, 0, 9),
 QT_MOC_LITERAL(1, 10, 16),
 QT_MOC_LITERAL(2, 27, 0),
 QT_MOC_LITERAL(3, 28, 17),
-QT_MOC_LITERAL(4, 46, 16),
-QT_MOC_LITERAL(5, 63, 19),
-QT_MOC_LITERAL(6, 83, 15),
-QT_MOC_LITERAL(7, 99, 9),
-QT_MOC_LITERAL(8, 109, 6),
-QT_MOC_LITERAL(9, 116, 7)
+QT_MOC_LITERAL(4, 46, 19),
+QT_MOC_LITERAL(5, 66, 15),
+QT_MOC_LITERAL(6, 82, 19),
+QT_MOC_LITERAL(7, 102, 10),
+QT_MOC_LITERAL(8, 113, 9),
+QT_MOC_LITERAL(9, 123, 6),
+QT_MOC_LITERAL(10, 130, 7)
     },
     "TradeMark\0handleButtonLeft\0\0"
-    "handleButtonRight\0handleButtonLoad\0"
-    "handleButtonReWater\0handleButtonCut\0"
-    "imageName\0String\0showImg"
+    "handleButtonRight\0handleButtonReWater\0"
+    "handleButtonCut\0handleButtonGetInfo\0"
+    "loadImages\0imageName\0String\0showImg"
 };
 #undef QT_MOC_LITERAL
 
@@ -53,7 +54,7 @@ static const uint qt_meta_data_TradeMark[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-       7,   14, // methods
+       8,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
@@ -61,13 +62,14 @@ static const uint qt_meta_data_TradeMark[] = {
        0,       // signalCount
 
  // slots: name, argc, parameters, tag, flags
-       1,    0,   49,    2, 0x08 /* Private */,
-       3,    0,   50,    2, 0x08 /* Private */,
-       4,    0,   51,    2, 0x08 /* Private */,
-       5,    0,   52,    2, 0x08 /* Private */,
-       6,    0,   53,    2, 0x08 /* Private */,
-       7,    0,   54,    2, 0x08 /* Private */,
-       9,    0,   55,    2, 0x08 /* Private */,
+       1,    0,   54,    2, 0x08 /* Private */,
+       3,    0,   55,    2, 0x08 /* Private */,
+       4,    0,   56,    2, 0x08 /* Private */,
+       5,    0,   57,    2, 0x08 /* Private */,
+       6,    0,   58,    2, 0x08 /* Private */,
+       7,    0,   59,    2, 0x08 /* Private */,
+       8,    0,   60,    2, 0x08 /* Private */,
+      10,    0,   61,    2, 0x08 /* Private */,
 
  // slots: parameters
     QMetaType::Void,
@@ -75,7 +77,8 @@ static const uint qt_meta_data_TradeMark[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    0x80000000 | 8,
+    QMetaType::Void,
+    0x80000000 | 9,
     QMetaType::Void,
 
        0        // eod
@@ -88,12 +91,13 @@ void TradeMark::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, v
         switch (_id) {
         case 0: _t->handleButtonLeft(); break;
         case 1: _t->handleButtonRight(); break;
-        case 2: _t->handleButtonLoad(); break;
-        case 3: _t->handleButtonReWater(); break;
-        case 4: _t->handleButtonCut(); break;
-        case 5: { String _r = _t->imageName();
+        case 2: _t->handleButtonReWater(); break;
+        case 3: _t->handleButtonCut(); break;
+        case 4: _t->handleButtonGetInfo(); break;
+        case 5: _t->loadImages(); break;
+        case 6: { String _r = _t->imageName();
             if (_a[0]) *reinterpret_cast< String*>(_a[0]) = _r; }  break;
-        case 6: _t->showImg(); break;
+        case 7: _t->showImg(); break;
         default: ;
         }
     }
@@ -124,13 +128,13 @@ int TradeMark::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 7)
+        if (_id < 8)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 7;
+        _id -= 8;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 7)
+        if (_id < 8)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 7;
+        _id -= 8;
     }
     return _id;
 }

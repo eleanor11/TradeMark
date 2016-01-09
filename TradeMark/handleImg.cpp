@@ -37,23 +37,6 @@ void HandleImg::removeWaterMark() {
 		newImages.push_back(img);
 	}
 }
-string HandleImg::removeWaterMark(string str){
-	Mat img = imread(str);
-	cvtColor(img, img, CV_RGB2GRAY);
-
-	Mat lut(1, 256, CV_8U);
-	for (int i = 0; i < 256; i++) {
-		lut.at<uchar>(i) = i;
-	}
-	lut.at<uchar>(184) = 255;
-
-	LUT(img, lut, img);
-
-	imwrite("new.png", img);
-
-	return "new.png";
-	//return str;
-}
 
 int min(int x, int y) {
 	if (x < y) return x;
@@ -110,7 +93,7 @@ void getPoints(std::vector<Vec4i> lines, int &xmin, int &xmid, int &xmax, int &y
 	xmin = x1 / t;
 	xmax = x2 / t;
 }
-std::list<int> selectLines(std::vector<Vec4i> &lines) {
+std::list<int> selectLines(std::vector<Vec4i> &lines, int max) {
 	vector<Vec4i> tmpLines = lines;
 	lines.clear();
 	std::list<int> rows;
@@ -123,21 +106,61 @@ std::list<int> selectLines(std::vector<Vec4i> &lines) {
 		}
 	}
 	rows.sort();
-	
+
+	int t = 0;
 	std::list<int>::iterator it = rows.begin();
 	while (it != rows.end()) {
-		int t = *it;
-		it++;
 		while (it != rows.end()) {
 			int t2 = *it;
-			it++;
-			if (std::abs(t - t2) < 5) {
+			if (t2 - t < 5) {
+				it++;
 				rows.remove(t2);
 			}
+			else if (max - t2 < 5) {
+				it++;
+				rows.remove(t2);
+			}
+			else {
+				break;
+			}
 		}
+		if (it == rows.end()) break;
+		t = *it;
+		it++;
 	}
 
 	return rows;
+}
+
+int getInfoNum(Mat img) {
+
+	int num = 0;
+
+	int t = img.channels();
+
+	int last = -1;
+	for (int i = 0; i < img.rows; i++) {
+		int s = -1, e = -1;
+		for (int j = 1; j < img.cols - 1; j++) {
+			if (img.at<uchar>(i, j) < 255) {
+				if (s < 0) {
+					s = j;
+				}
+				e = j;
+			}
+		}
+
+		if (s > 1){
+			if (s < 30) {
+				if (last < 0 || i - last > 1) {
+					num++;
+				}
+				last = i;
+			}
+		}
+
+	}
+	return num;
 }
 
 void HandleImg::markImages() {
@@ -224,11 +247,14 @@ void HandleImg::cutMarkers() {
 
 	Mat contours;
 	std::vector<Vec4i> lines;
+	bool save = true;
+	Mat lastImg;
+	int lastNum;
 	for (int i = 0; i < tmpImages.size(); i++) {
 		Mat img = tmpImages[i];
 		Canny(img, contours, 125, 350);
 		HoughLinesP(contours, lines, 1, CV_PI / 180, 200, 250, 10);
-		std::list<int> rows = selectLines(lines);
+		std::list<int> rows = selectLines(lines, img.rows);
 		std::list<int>::iterator it = rows.begin();
 		int xmin = 0, h;
 		int ymin = 0, w = img.cols;
@@ -241,6 +267,63 @@ void HandleImg::cutMarkers() {
 				Mat img1;
 				img(rect).copyTo(img1);
 
+				if (!save) {
+					if (lastNum + getInfoNum(img1) < 10) {
+						Mat newImg = Mat(lastImg.rows + img1.rows, max(lastImg.cols, img1.cols), img1.type());
+						lastImg.copyTo(newImg(Rect(0, 0, lastImg.cols, lastImg.rows)));
+						img1.copyTo(newImg(Rect(0, lastImg.rows, img1.cols, img1.rows)));
+						img1 = newImg;
+						save = true;
+					}
+					else {
+						int tmp = newImages.size();
+						std::stringstream ss;
+						ss << tmp;
+						String str = "markers/marker_" + ss.str() + ".png";
+						imwrite(str, lastImg);
+						newImages.push_back(lastImg);
+						save = true;
+					}
+				}
+				if (save) {
+					int tmp = newImages.size();
+					std::stringstream ss;
+					ss << tmp;
+					String str = "markers/marker_" + ss.str() + ".png";
+					imwrite(str, img1);
+					newImages.push_back(img1);
+				}
+			}
+
+			xmin += h;
+			it++;
+		}
+		h = img.rows - xmin; 
+		
+		if (h > 5) {
+
+			Rect rect(ymin, xmin, w, h);
+			Mat img1;
+			img(rect).copyTo(img1);
+
+			if (!save) {
+				Mat newImg = Mat(lastImg.rows + img1.rows, max(lastImg.cols, img1.cols), img1.type());
+				lastImg.copyTo(newImg(Rect(0, 0, lastImg.cols, lastImg.rows)));
+				img1.copyTo(newImg(Rect(0, lastImg.rows, img1.cols, img1.rows)));
+				img1 = newImg;
+				save = true;
+			}
+			else {
+				int num = getInfoNum(img1);
+				if (getInfoNum(img1) < 8) {
+					//imwrite("img.png", img1);
+					save = false;
+					lastImg = img1;
+					lastNum = num;
+				}
+			}
+
+			if (save) {
 				int tmp = newImages.size();
 				std::stringstream ss;
 				ss << tmp;
@@ -248,26 +331,31 @@ void HandleImg::cutMarkers() {
 				imwrite(str, img1);
 				newImages.push_back(img1);
 			}
-
-			xmin += h;
-			it++;
-		}
-		h = img.rows - xmin;
-		if (h > 5) {
-			Rect rect(ymin, xmin, w, h);
-			Mat img1;
-			img(rect).copyTo(img1);
-
-			int tmp = newImages.size();
-			std::stringstream ss;
-			ss << tmp;
-			String str = "markers/marker_" + ss.str() + ".png";
-			imwrite(str, img1);
-			newImages.push_back(img1);
 		}
 
 
 	}
+}
+void HandleImg::getInfo() {
+
+}
+
+string HandleImg::removeWaterMark(string str){
+	Mat img = imread(str);
+	cvtColor(img, img, CV_RGB2GRAY);
+
+	Mat lut(1, 256, CV_8U);
+	for (int i = 0; i < 256; i++) {
+		lut.at<uchar>(i) = i;
+	}
+	lut.at<uchar>(184) = 255;
+
+	LUT(img, lut, img);
+
+	imwrite("new.png", img);
+
+	return "new.png";
+	//return str;
 }
 string HandleImg::cutImages(string str) {
 	Mat img = imread(str);
@@ -298,4 +386,51 @@ string HandleImg::cutImages(string str) {
 	//imwrite("new.png", img);
 	return "new.png";
 }
+string HandleImg::getInfo(string str) {
+	Mat img = imread(str);
 
+	int t = img.channels();
+
+	std::vector<Vec2i> lines;
+
+	std::vector<int> lines2;
+
+	int last = -1;
+	for (int i = 0; i < img.rows; i++) {
+		int s = -1, e = -1;
+		for (int j = 1; j < img.cols - 1; j++) {
+			Vec3b &rgb = img.at<Vec3b>(i, j);
+			if (rgb[0] < 255) {
+				if (s < 0) {
+					s = j;
+				}
+				e = j;
+			}
+		}
+		
+		if (s > 1){
+			if (s < 30) {
+				if (last < 0 || i - last > 1) {
+					lines2.push_back(i - 1);
+				}
+				last = i;
+			}
+
+		}
+		lines.push_back(Vec2i(s, e));
+
+	}
+
+	//for (int i = 0; i < lines2.size(); i++) {
+	//	line(img, Point(0, lines2[i]), Point(img.cols, lines2[i]), Scalar(0, 0, 255), 1, CV_AA);
+	//}
+
+	for (int i = 0; i < img.rows; i++) {
+		int s = lines[i][0];
+		int e = lines[i][1];
+		line(img, Point(s, i), Point(e, i), Scalar(0, 0, 255), 1, CV_AA);
+	}
+
+	imwrite("new.png", img);
+	return "new.png";
+}

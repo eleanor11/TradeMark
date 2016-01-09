@@ -61,10 +61,13 @@ public:
 	void cutEdges();
 	void cutColumns();
 	void cutMarkers();
+	void getInfo();
+
 	void cutImages();
 
 	string removeWaterMark(string str);
 	string cutImages(string str);
+	string getInfo(string str);
 
 
 private: 

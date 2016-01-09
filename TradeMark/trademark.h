@@ -19,10 +19,11 @@ public:
 private slots:
 	void handleButtonLeft();
 	void handleButtonRight();
-	void handleButtonLoad();
 	void handleButtonReWater();
 	void handleButtonCut();
+	void handleButtonGetInfo();
 
+	void loadImages();
 	String imageName();
 	void showImg();
 
@@ -31,9 +32,9 @@ private:
 	Ui::TradeMarkClass ui;
 	QPushButton *m_buttonLeft;
 	QPushButton *m_buttonRight;
-	QPushButton *m_buttonLoad;
 	QPushButton *m_buttonReWater;
 	QPushButton *m_buttonCut;
+	QPushButton *m_buttonGetInfo;
 	QLabel *label;
 
 	HandleImg hi;
