@@ -162,6 +162,9 @@ void TradeMark::handleButtonCut() {
 }
 
 void TradeMark::handleButtonGetInfo() {
+
+//	hi.getInfo("marker_0_1.png");
+
 	hi.getInfo();
 	type = 8;
 

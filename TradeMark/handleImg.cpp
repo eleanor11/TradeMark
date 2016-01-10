@@ -174,6 +174,36 @@ void mergeList(std::list<int> &list1, std::list<int> list2, int t) {
 	list1 = list2;
 }
 
+void cutNumber(Mat &img) {
+	int s = 0, e = 0;
+	int t = 0, last = 0;
+
+	int c = img.channels();
+
+	for (int i = 0; i < img.cols; i++) {
+		for (int j = 0; j < img.rows; j++) {
+			int tmp = img.at<uchar>(j, i);
+			if (c == 3) tmp = img.at<Vec3b>(j, i)[0];
+			if (tmp < 255) {
+				if (i - last > 5) {
+					t++;
+					if (t == 2){
+						s = i - 3;
+					}
+					if (t == 3) {
+						e = last + 3;
+						break;
+					}
+				}
+				last = i; 
+				break;
+			}
+		}
+		if (e > 0) break;
+	}
+	Rect rect(s, 0, e - s, img.rows);
+	img(rect).copyTo(img);
+}
 void cutLogo(Mat &img) {
 
 	int t = img.channels();
@@ -198,6 +228,35 @@ void cutLogo(Mat &img) {
 	Rect rect(xmin, ymin, xmax - xmin, ymax - ymin);
 	img(rect).copyTo(img);
 
+}
+int getBoundary(Mat &img) {
+
+	int t = 0, last = 0;
+	int s;
+
+	int c = img.channels();
+
+	for (int i = 0; i < img.cols; i++) {
+		for (int j = 0; j < img.rows; j++) {
+			int tmp = img.at<uchar>(j, i);
+			if (c == 3) tmp = img.at<Vec3b>(j, i)[0];
+			if (tmp < 255) {
+				if (i - last > 10) {
+					t++;
+					if (t == 2){
+						s = i - 3;
+						Rect rect(s, 0, img.cols - s, img.rows);
+						img(rect).copyTo(img);
+						return s;
+					}
+				}
+				last = i;
+				break;
+			}
+		}
+	}
+
+	return 0;
 }
 
 void HandleImg::markImages() {
@@ -392,7 +451,7 @@ void HandleImg::getInfo() {
 		int min = 0, max;
 		std::list<int>::iterator it = rows.begin();
 		int j = 0;
-		int t;
+		int t1, t2;
 		while (it != rows.end()) {
 			min = *it++;
 			if (it != rows.end()){
@@ -404,13 +463,36 @@ void HandleImg::getInfo() {
 			Rect rect(0, min, w, max - min);
 			Mat img1;
 			img(rect).copyTo(img1);
-			if (j == 2) {
-				Rect rect(0, min + t, w, max - min - t);
+			
+			switch (j) {
+			case 0:	{
+				cutNumber(img1);
+				t1 = max - min;
+				break;
+			}
+			case 1: {
+				t2 = getBoundary(img1);
+				break;
+			}
+			case 2: {
+				Rect rect(0, min + t1, w, max - min - t1);
 				img(rect).copyTo(img1);
 				cutLogo(img1);
+				break;
+			}
+			case 3: {
+				break;
+			}
+			case 4: {
+
+			}
+			default: {
+				Rect rect(t2, min, w - t2, max - min);
+				img(rect).copyTo(img1);
 			}
 
-			if (j == 0) t = max - min;
+			}
+
 
 			std::stringstream ss;
 			ss << i << "_" << j;
@@ -471,37 +553,37 @@ string HandleImg::cutImages(string str) {
 string HandleImg::getInfo(string str) {
 	Mat img = imread(str);
 
-	int t = img.channels();
+	//int t = img.channels();
 
-	std::vector<Vec2i> lines;
+	//std::vector<Vec2i> lines;
 
-	std::vector<int> lines2;
+	//std::vector<int> lines2;
 
-	int last = -1;
-	for (int i = 0; i < img.rows; i++) {
-		int s = -1, e = -1;
-		for (int j = 1; j < img.cols - 1; j++) {
-			Vec3b &rgb = img.at<Vec3b>(i, j);
-			if (rgb[0] < 255) {
-				if (s < 0) {
-					s = j;
-				}
-				e = j;
-			}
-		}
-		
-		if (s > 1){
-			if (s < 30) {
-				if (last < 0 || i - last > 1) {
-					lines2.push_back(i - 1);
-				}
-				last = i;
-			}
+	//int last = -1;
+	//for (int i = 0; i < img.rows; i++) {
+	//	int s = -1, e = -1;
+	//	for (int j = 1; j < img.cols - 1; j++) {
+	//		Vec3b &rgb = img.at<Vec3b>(i, j);
+	//		if (rgb[0] < 255) {
+	//			if (s < 0) {
+	//				s = j;
+	//			}
+	//			e = j;
+	//		}
+	//	}
+	//	
+	//	if (s > 1){
+	//		if (s < 30) {
+	//			if (last < 0 || i - last > 1) {
+	//				lines2.push_back(i - 1);
+	//			}
+	//			last = i;
+	//		}
 
-		}
-		lines.push_back(Vec2i(s, e));
+	//	}
+	//	lines.push_back(Vec2i(s, e));
 
-	}
+	//}
 
 	//for (int i = 0; i < lines2.size(); i++) {
 	//	line(img, Point(0, lines2[i]), Point(img.cols, lines2[i]), Scalar(0, 0, 255), 1, CV_AA);
@@ -512,6 +594,8 @@ string HandleImg::getInfo(string str) {
 	//	int e = lines[i][1];
 	//	line(img, Point(s, i), Point(e, i), Scalar(0, 0, 255), 1, CV_AA);
 	//}
+
+	getBoundary(img);
 
 	imwrite("new.png", img);
 	return "new.png";
