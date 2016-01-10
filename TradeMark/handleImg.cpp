@@ -258,6 +258,40 @@ int getBoundary(Mat &img) {
 
 	return 0;
 }
+void getClassNum(Mat img, int idx) {
+
+	int s = 0, e = 0;
+	int t = 0, last = 0;
+
+	int c = img.channels();
+
+	for (int i = 0; i < img.cols; i++) {
+		for (int j = 0; j < img.rows - 12; j++) {
+			int tmp = img.at<uchar>(j, i);
+			if (c == 3) tmp = img.at<Vec3b>(j, i)[0];
+			if (tmp < 255) {
+				if (i - last > 5) {
+					t++;
+					if (t == 2){
+						s = i - 2;
+					}
+					if (t == 3) {
+						e = last + 2;
+						break;
+					}
+				}
+				last = i;
+				break;
+			}
+		}
+		if (e > 0) break;
+	}
+	Rect rect(s, 0, e - s, img.rows);
+	std::stringstream ss;
+	ss << idx << "_40";
+	String str = "categories/marker_" + ss.str() + ".png";
+	imwrite(str, img(rect));
+}
 
 void HandleImg::markImages() {
 	Mat contours;
@@ -484,7 +518,7 @@ void HandleImg::getInfo() {
 				break;
 			}
 			case 4: {
-
+				getClassNum(img(Rect(0, min, w, t1)), i);
 			}
 			default: {
 				Rect rect(t2, min, w - t2, max - min);
@@ -502,6 +536,56 @@ void HandleImg::getInfo() {
 			j++;
 		}
 	}
+}
+
+bool HandleImg::cutDate(string str) {
+	Mat img = imread(str);
+
+	if (img.empty()) {
+		return false;
+	}
+
+	int s = 0, e = 0;
+	int t = 0, last = 0;
+	bool flag = true;
+
+	int c = img.channels();
+
+	for (int i = 2; i < img.cols; i++) {
+		for (int j = 0; j < img.rows; j++) {
+			int tmp = img.at<uchar>(j, i);
+			if (c == 3) tmp = img.at<Vec3b>(j, i)[0];
+			if (tmp < 255) {
+				if (flag) {
+					s = i - 2;
+					flag = false;
+				}
+				if (i - last > 5 && last > 0) {
+					t++;
+					e = last + 2;
+					if (t == 1) {
+						Mat img1;
+						img(Rect(s, 0, e - s, img.rows)).copyTo(img1);
+						imwrite("y.png", img1);
+					}
+					if (t == 3) {
+						Mat img1;
+						img(Rect(s, 0, e - s, img.rows)).copyTo(img1);
+						imwrite("m.png", img1);
+					}
+					if (t == 5) {
+						Mat img1;
+						img(Rect(s, 0, e - s, img.rows)).copyTo(img1);
+						imwrite("d.png", img1);
+						return true;
+					}
+					s = i;
+				}
+				last = i;
+			}
+		}
+	}
+	return true;
 }
 
 string HandleImg::removeWaterMark(string str){

@@ -4,6 +4,7 @@
 #include <math.h>
 #include <list>
 #include <strstream>
+#include <fstream>
 
 using namespace cv;
 
@@ -49,6 +50,9 @@ public:
 		return images.size();
 	}
 	int getMarkerNum() {
+		if (newImages.size() == 0) {
+			return 36;
+		}
 		return newImages.size();
 	}
 
@@ -62,6 +66,8 @@ public:
 	void cutColumns();
 	void cutMarkers();
 	void getInfo();
+
+	bool cutDate(string str);
 
 	void cutImages();
 

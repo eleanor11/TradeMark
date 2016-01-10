@@ -9,6 +9,7 @@
 #include <qpixmap.h>
 #include "ui_trademark.h"
 #include "handleImg.h"
+#include "OCR.h"
 
 class TradeMark : public QMainWindow
 {
@@ -19,6 +20,7 @@ public:
 	~TradeMark();
 
 private slots:
+	void handleButtonSelect();
 	void handleButtonLeft();
 	void handleButtonRight();
 	void handleButtonReWater();
@@ -29,6 +31,10 @@ private slots:
 private:
 
 	Ui::TradeMarkClass ui;
+
+	QLabel *l_select;
+	QPushButton *m_buttonSelect;
+
 	QPushButton *m_buttonLeft;
 	QPushButton *m_buttonRight;
 	QPushButton *m_buttonReWater;
@@ -44,6 +50,7 @@ private:
 	QLabel *l_logoImage;
 	QLabel *l_content;
 	QLabel *l_class;
+	QTextEdit *e_classNum;
 	QTextEdit *e_class; 
 	QLabel *l_applicant;
 	QTextEdit *e_applicant;
@@ -59,11 +66,15 @@ private:
 
 	int type;	//0:origin, 1:remove water mark, 
 	int num;
+	bool redo;
 
 	void loadImages();
 	String imageName(int type);
+	String imageNameC(int c);
+	String fileName();
 	void showImg(int type);
 	void showMessage();
+	void showMessageFile();
 
 };
 

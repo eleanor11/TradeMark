@@ -38,8 +38,8 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
-    <IncludePath>D:\develop\tools\Qt\Qt5.3.2\5.3\msvc2013\include;D:\develop\tools\opencv\opencv2\build\include;D:\develop\tools\opencv\opencv2\build\include\opencv;D:\develop\tools\opencv\opencv2\build\include\opencv2;$(IncludePath)</IncludePath>
-    <LibraryPath>D:\develop\tools\opencv\opencv2\build\x86\vc12\lib;D:\develop\tools\Qt\Qt5.3.2\5.3\msvc2013\lib;$(LibraryPath)</LibraryPath>
+    <IncludePath>D:\develop\tools\Qt\Qt5.3.2\5.3\msvc2013\include;D:\develop\tools\opencv\opencv2\build\include;D:\develop\tools\opencv\opencv2\build\include\opencv;D:\develop\tools\opencv\opencv2\build\include\opencv2;D:\develop\tools\Tesseract-OCR\include\tesseract;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\develop\tools\opencv\opencv2\build\x86\vc12\lib;D:\develop\tools\Qt\Qt5.3.2\5.3\msvc2013\lib;D:\develop\tools\Tesseract-OCR\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)$(Platform)\$(Configuration)\</OutDir>
@@ -92,6 +92,7 @@
     </ClCompile>
     <ClCompile Include="handleImg.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="OCR.cpp" />
     <ClCompile Include="trademark.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -121,6 +122,7 @@
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_trademark.h" />
     <ClInclude Include="handleImg.h" />
+    <ClInclude Include="OCR.h" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="trademark.qrc">
