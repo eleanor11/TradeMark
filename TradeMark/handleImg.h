@@ -5,6 +5,7 @@
 #include <list>
 #include <strstream>
 #include <fstream>
+#include "OCR.h"
 
 using namespace cv;
 
@@ -60,14 +61,18 @@ public:
 	void saveImg(IplImage* img, string str);
 
 	void loadImages();
+	void loadMarkers();
 	void removeWaterMark();
 	void markImages();
 	void cutEdges();
 	void cutColumns();
 	void cutMarkers();
+	void cutCates();
 	void getInfo();
+	void getInfoByLine();
 
 	bool cutDate(string str);
+	void cutDate(Mat img);
 
 	void cutImages();
 

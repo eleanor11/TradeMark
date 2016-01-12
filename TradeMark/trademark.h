@@ -9,7 +9,6 @@
 #include <qpixmap.h>
 #include "ui_trademark.h"
 #include "handleImg.h"
-#include "OCR.h"
 
 class TradeMark : public QMainWindow
 {

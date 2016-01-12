@@ -1,5 +1,7 @@
 #include "OCR.h"
 
+using namespace std;
+
 string UTF8ToGBK(const std::string& strUTF8)
 {
 	int len = MultiByteToWideChar(CP_UTF8, 0, strUTF8.c_str(), -1, NULL, 0);

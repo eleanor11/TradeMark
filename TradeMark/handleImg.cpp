@@ -23,6 +23,16 @@ void HandleImg::loadImages() {
 	}
 }
 
+void HandleImg::loadMarkers() {
+	for (int i = 0; i < 36; i++) {
+		std::stringstream ss;
+		ss << i;
+		String str = "markers/marker_" + ss.str() + ".png";
+		Mat img = imread(str);
+		newImages.push_back(img);
+	}
+}
+
 void HandleImg::removeWaterMark() {
 	
 	Mat lut(1, 256, CV_8U);
@@ -35,19 +45,11 @@ void HandleImg::removeWaterMark() {
 		Mat img = images[i];
 		cvtColor(img, img, CV_RGB2GRAY);
 		LUT(img, lut, img);
-		imwrite(strs[i] + addition[1], img);
+		cv::imwrite(strs[i] + addition[1], img);
 		newImages.push_back(img);
 	}
 }
 
-int min(int x, int y) {
-	if (x < y) return x;
-	else return y;
-}
-int max(int x, int y) {
-	if (x > y) return x;
-	else return y;
-}
 void getVerticleLines(std::vector<Vec4i> lines, std::vector<Vec4i> &verticle, std::vector<Vec4i> &horizontal){
 	for (int i = 0; i < lines.size(); i++) {
 		Vec4i l = lines[i];
@@ -138,13 +140,15 @@ int getInfoNum(Mat img, std::list<int> &cateRows) {
 
 	int num = 0;
 
-	int t = img.channels();
+	int c = img.channels();
 
 	int last = -1;
 	for (int i = 4; i < img.rows - 1; i++) {
 		int s = -1, e = -1;
 		for (int j = 1; j < img.cols - 1; j++) {
-			if (img.at<uchar>(i, j) < 255) {
+			int tmp = img.at<uchar>(i, j);
+			if (c == 3) tmp = img.at<Vec3b>(i, j)[0];
+			if (tmp < 255) {
 				if (s < 0) {
 					s = j;
 				}
@@ -174,9 +178,29 @@ void mergeList(std::list<int> &list1, std::list<int> list2, int t) {
 	list1 = list2;
 }
 
+
+void rescale(Mat &img) {
+	int w = (int)(15.0 / img.rows * img.cols);
+	resize(img, img, Size(w, 15));
+}
+string cleanString(string str) {
+
+	int t = 0;
+	while ((t = str.find('\n', t)) > 0) {
+		str = str.erase(t, 1);
+	}
+	t = 0;
+	while ((t = str.find('\\', t)) > 0) {
+		str = str.erase(t, 1);
+	}
+
+	return str;
+}
 void cutNumber(Mat &img) {
 	int s = 0, e = 0;
 	int t = 0, last = 0;
+
+	imwrite("tmp.png", img);
 
 	int c = img.channels();
 
@@ -206,12 +230,14 @@ void cutNumber(Mat &img) {
 }
 void cutLogo(Mat &img) {
 
-	int t = img.channels();
+	int c = img.channels();
 
 	int xmin = img.cols, xmax = -1, ymin = img.rows, ymax = -1;
 	for (int i = 2; i < img.rows - 2; i++) {
 		for (int j = 2; j < img.cols - 2; j++) {
-			if (img.at<uchar>(i, j) < 255) {
+			int tmp = img.at<uchar>(i, j);
+			if (c == 3) tmp = img.at<Vec3b>(i, j)[0];
+			if (tmp < 255) {
 				xmin = min(xmin, j);
 				xmax = max(xmax, j);
 				ymin = min(ymin, i);
@@ -228,6 +254,23 @@ void cutLogo(Mat &img) {
 	Rect rect(xmin, ymin, xmax - xmin, ymax - ymin);
 	img(rect).copyTo(img);
 
+}
+string cutContent(Mat img, int h) {
+	int i = 0;
+	int r = img.rows;
+	int c = img.cols;
+	string tmp = "tmp.png";
+	string content = "";
+
+	while (i < r) {
+		int j = min(i + h, r);
+		Mat img1 = img(Rect(0, i, c, j - i));
+		cv::imwrite(tmp, img1);
+		content += img2chi(tmp);
+		i = j + 1;
+	}
+
+	return cleanString(content);
 }
 int getBoundary(Mat &img) {
 
@@ -257,6 +300,38 @@ int getBoundary(Mat &img) {
 	}
 
 	return 0;
+}
+void getClassNum(Mat img) {
+
+	int s = 0, e = 0;
+	int t = 0, last = 0;
+
+	int c = img.channels();
+
+	for (int i = 0; i < img.cols; i++) {
+		for (int j = 0; j < img.rows - 12; j++) {
+			int tmp = img.at<uchar>(j, i);
+			if (c == 3) tmp = img.at<Vec3b>(j, i)[0];
+			if (tmp < 255) {
+				if (i - last > 5) {
+					t++;
+					if (t == 2){
+						s = i - 2;
+					}
+					if (t == 3) {
+						e = last + 2;
+						break;
+					}
+				}
+				last = i;
+				break;
+			}
+		}
+		if (e > 0) break;
+	}
+	Rect rect(s, 0, e - s, img.rows);
+	//rescale(img(rect));
+	cv::imwrite("tmp.png", img(rect));
 }
 void getClassNum(Mat img, int idx) {
 
@@ -290,7 +365,16 @@ void getClassNum(Mat img, int idx) {
 	std::stringstream ss;
 	ss << idx << "_40";
 	String str = "categories/marker_" + ss.str() + ".png";
-	imwrite(str, img(rect));
+	cv::imwrite(str, img(rect));
+}
+
+string toDate() {
+
+	string y = img2chi("y.png");
+	string m = img2chi("m.png");
+	string d = img2chi("d.png");
+
+	return cleanString(y + "-" + m + "-" + d);
 }
 
 void HandleImg::markImages() {
@@ -314,7 +398,7 @@ void HandleImg::markImages() {
 		line(img, Point(xmin, ymin), Point(xmax, ymin), Scalar(0, 0, 255), 3, CV_AA);
 		line(img, Point(xmin, ymax), Point(xmax, ymax), Scalar(0, 0, 255), 3, CV_AA);
 
-		imwrite(strs[i] + addition[2], img);
+		cv::imwrite(strs[i] + addition[2], img);
 		newImages[i] = img;
 	}
 }
@@ -332,7 +416,7 @@ void HandleImg::cutEdges() {
 		Rect rect(xmin, ymin, xmax - xmin, ymax - ymin);
 		img(rect).copyTo(img);
 
-		imwrite(strs[i] + addition[3], img);
+		cv::imwrite(strs[i] + addition[3], img);
 
 		newImages[i] = img;
 	}
@@ -416,7 +500,7 @@ void HandleImg::cutMarkers() {
 						std::stringstream ss;
 						ss << tmp;
 						String str = "markers/marker_" + ss.str() + ".png";
-						imwrite(str, lastImg);
+						cv::imwrite(str, lastImg);
 						newImages.push_back(lastImg);
 						imageRows.push_back(lastCateRows);
 						save = true;
@@ -427,7 +511,7 @@ void HandleImg::cutMarkers() {
 					std::stringstream ss;
 					ss << tmp;
 					String str = "markers/marker_" + ss.str() + ".png";
-					imwrite(str, img1);
+					cv::imwrite(str, img1);
 					newImages.push_back(img1);
 					imageRows.push_back(cateRows);
 				}
@@ -468,7 +552,7 @@ void HandleImg::cutMarkers() {
 				std::stringstream ss;
 				ss << tmp;
 				String str = "markers/marker_" + ss.str() + ".png";
-				imwrite(str, img1);
+				cv::imwrite(str, img1);
 				newImages.push_back(img1);
 				imageRows.push_back(cateRows);
 			}
@@ -477,9 +561,147 @@ void HandleImg::cutMarkers() {
 
 	}
 }
-void HandleImg::getInfo() {
+void HandleImg::cutCates() {
+
+	imageRows.clear();
+
 	for (int i = 0; i < newImages.size(); i++) {
 		Mat img = newImages[i];
+		std::list<int> cateRows;
+
+		int num = getInfoNum(img, cateRows);
+		imageRows.push_back(cateRows);
+	}
+
+}
+
+void HandleImg::getInfo() {
+
+	if (newImages.size() == 0) {
+		loadMarkers();
+		cutCates();
+	}
+
+	for (int i = 0; i < newImages.size(); i++) {
+
+		std::stringstream ss;
+		ss << i;
+		string name = "doc/marker_" + ss.str() + ".txt";
+		ofstream out;
+		out.open(name.c_str(), ios::out);
+
+		string tmp = "tmp.png";
+
+		Mat img = newImages[i];
+		//threshold(img, img, 200, 255, CV_THRESH_BINARY);
+		std::list<int> rows = imageRows[i];
+		int w = img.cols, h = img.rows;
+		int min = 0, max;
+		std::list<int>::iterator it = rows.begin();
+		int j = 0;
+		int t1, t2;
+		while (it != rows.end()) {
+			min = *it++;
+			if (it != rows.end()){
+				max = *it;
+			}
+			else {
+				max = h;
+			}
+			Rect rect(0, min, w, max - min);
+			Mat img1;
+			img(rect).copyTo(img1);
+
+			switch (j) {
+			case 0:	{	//number
+				t1 = max - min;
+				cutNumber(img1);
+				//rescale(img1);
+				cv::imwrite(tmp, img1);
+				string content = cleanString(img2chi(tmp));
+				out << content << endl;
+				break;
+			}
+			case 1: {	//date
+				t2 = getBoundary(img1);
+				cutDate(img1);
+				string content = toDate();
+				out << content << endl;
+				break;
+			}
+			case 2: {	//logo
+				Rect rect(0, min + t1, w, max - min - t1);
+				img(rect).copyTo(img1);
+				imwrite(tmp, img1);
+				cutLogo(img1);
+				break;
+			}
+			case 3: {	//
+				break;
+			}
+			case 4: {	//class
+				getClassNum(img(Rect(0, min, w, t1)));
+				string content = cleanString(img2chi(tmp));
+				out << content << endl;
+
+				img1 = img(Rect(t2, min, w - t2, max - min));
+				cv::imwrite(tmp, img1);
+				string content = cleanString(img2chi(tmp));
+				out << content << endl;
+				break;
+			}
+			case 5:		//application
+			case 6:		//address
+			case 7: {	//agency
+				img1 = img(Rect(t2, min, w - t2, max - min));
+				cv::imwrite(tmp, img1);
+				string content = cleanString(img2chi(tmp));
+				out << content << endl;
+				break;
+			}
+			case 8: {	//priority
+				img1 = img(Rect(t2, min, w - t2, max - min));
+				cv::imwrite(tmp, img1);
+				string content = cleanString(img2chi(tmp));
+				out << content << endl;
+			}
+			default: {
+			}
+
+			}
+
+			std::stringstream ss;
+			ss << i << "_" << j;
+			String str = "categories/marker_" + ss.str() + ".png";
+			cv::imwrite(str, img1);
+
+			j++;
+		}
+
+		out.close();
+	}
+
+
+}
+void HandleImg::getInfoByLine() {
+
+	if (newImages.size() == 0) {
+		loadMarkers();
+		cutCates();
+	}
+
+	for (int i = 0; i < newImages.size(); i++) {
+
+		std::stringstream ss;
+		ss << i;
+		string name = "doc/marker_" + ss.str() + ".txt";
+		ofstream out;
+		out.open(name.c_str(), ios::out);
+
+		string tmp = "tmp.png";
+
+		Mat img = newImages[i];
+		//threshold(img, img, 200, 255, CV_THRESH_BINARY);
 		std::list<int> rows = imageRows[i];
 		int w = img.cols, h = img.rows;
 		int min = 0, max;
@@ -499,43 +721,73 @@ void HandleImg::getInfo() {
 			img(rect).copyTo(img1);
 			
 			switch (j) {
-			case 0:	{
-				cutNumber(img1);
+			case 0:	{	//number
 				t1 = max - min;
+				cutNumber(img1);
+				//rescale(img1);
+				cv::imwrite(tmp, img1);
+				string content = cleanString(img2chi(tmp));
+				out << content << endl;
 				break;
 			}
-			case 1: {
+			case 1: {	//date
 				t2 = getBoundary(img1);
+				cutDate(img1);
+				string content = toDate();
+				out << content << endl;
 				break;
 			}
-			case 2: {
+			case 2: {	//logo
 				Rect rect(0, min + t1, w, max - min - t1);
 				img(rect).copyTo(img1);
+				imwrite(tmp, img1);
 				cutLogo(img1);
 				break;
 			}
-			case 3: {
+			case 3: {	//
 				break;
 			}
-			case 4: {
-				getClassNum(img(Rect(0, min, w, t1)), i);
+			case 4: {	//class
+				getClassNum(img(Rect(0, min, w, t1)));
+				string content = cleanString(img2chi(tmp));
+				out << content << endl;
+				
+				img1 = img(Rect(t2, min, w - t2, max - min));
+				content = cutContent(img1, t1);
+				out << content << endl;
+				break;
+			}
+			case 5:		//application
+			case 6:		//address
+			case 7: {	//agency
+				img1 = img(Rect(t2, min, w - t2, max - min));
+				string content = cutContent(img1, t1);
+				out << content << endl;
+				break;
+			}
+			case 8: {	//priority
+				img1 = img(Rect(t2, min, w - t2, max - min));
+				cutDate(img1);
+				string content = toDate();
+				out << content << endl;
 			}
 			default: {
-				Rect rect(t2, min, w - t2, max - min);
-				img(rect).copyTo(img1);
 			}
 
 			}
-
 
 			std::stringstream ss;
 			ss << i << "_" << j;
 			String str = "categories/marker_" + ss.str() + ".png";
-			imwrite(str, img1);
+			cv::imwrite(str, img1);
 			
 			j++;
 		}
+
+		out.close();
 	}
+
+	
 }
 
 bool HandleImg::cutDate(string str) {
@@ -566,17 +818,17 @@ bool HandleImg::cutDate(string str) {
 					if (t == 1) {
 						Mat img1;
 						img(Rect(s, 0, e - s, img.rows)).copyTo(img1);
-						imwrite("y.png", img1);
+						cv::imwrite("y.png", img1);
 					}
 					if (t == 3) {
 						Mat img1;
 						img(Rect(s, 0, e - s, img.rows)).copyTo(img1);
-						imwrite("m.png", img1);
+						cv::imwrite("m.png", img1);
 					}
 					if (t == 5) {
 						Mat img1;
 						img(Rect(s, 0, e - s, img.rows)).copyTo(img1);
-						imwrite("d.png", img1);
+						cv::imwrite("d.png", img1);
 						return true;
 					}
 					s = i;
@@ -586,6 +838,54 @@ bool HandleImg::cutDate(string str) {
 		}
 	}
 	return true;
+}
+
+void HandleImg::cutDate(Mat img) {
+
+	int s = 0, e = 0;
+	int t = 0, last = 0;
+	bool flag = true;
+
+	int c = img.channels();
+
+	for (int i = 2; i < img.cols; i++) {
+		for (int j = 0; j < img.rows; j++) {
+			int tmp = img.at<uchar>(j, i);
+			if (c == 3) tmp = img.at<Vec3b>(j, i)[0];
+			if (tmp < 255) {
+				if (flag) {
+					s = i - 2;
+					flag = false;
+				}
+				if (i - last > 5 && last > 0) {
+					t++;
+					e = last + 2;
+					if (t == 1) {
+						Mat img1;
+						img(Rect(s, 0, e - s, img.rows)).copyTo(img1);
+						//rescale(img1);
+						cv::imwrite("y.png", img1);
+					}
+					if (t == 3) {
+						Mat img1;
+						img(Rect(s, 0, e - s, img.rows)).copyTo(img1);
+						//rescale(img1);
+						cv::imwrite("m.png", img1);
+					}
+					if (t == 5) {
+						Mat img1;
+						img(Rect(s, 0, e - s, img.rows)).copyTo(img1);
+						//rescale(img1);
+						cv::imwrite("d.png", img1);
+						return;
+					}
+					s = i;
+				}
+				last = i;
+			}
+		}
+	}
+	return;
 }
 
 string HandleImg::removeWaterMark(string str){
@@ -600,7 +900,7 @@ string HandleImg::removeWaterMark(string str){
 
 	LUT(img, lut, img);
 
-	imwrite("new.png", img);
+	cv::imwrite("new.png", img);
 
 	return "new.png";
 	//return str;
@@ -617,7 +917,7 @@ string HandleImg::cutImages(string str) {
 		line(img, Point(l[0], l[1]), Point(l[2], l[3]), Scalar(0, 0, 255), 1, CV_AA);
 	}
 
-	imwrite("new.png", img);
+	cv::imwrite("new.png", img);
 
 	//int xmin, xmid, xmax, ymin, ymax;
 	//getPoints(lines, xmin, xmid, xmax, ymin, ymax);
@@ -681,6 +981,7 @@ string HandleImg::getInfo(string str) {
 
 	getBoundary(img);
 
-	imwrite("new.png", img);
+	cv::imwrite("new.png", img);
 	return "new.png";
 }
+

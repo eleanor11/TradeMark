@@ -204,7 +204,7 @@ void TradeMark::handleButtonGetInfo() {
 	type = 8;
 
 	if (redo) {
-		hi.getInfo();
+		hi.getInfoByLine();
 	}
 	showImg(6);
 	showMessage();
@@ -267,109 +267,88 @@ void TradeMark::showImg(int type) {
 	label->show();
 }
 
-string cleanString(string str) {
-
-	int t = 0;
-	while ((t = str.find('\n', t)) > 0) {
-		str = str.erase(t, 1);
-	}
-	t = 0;
-	while ((t = str.find('\\', t)) > 0) {
-		str = str.erase(t, 1);
-	}
-
-	return str;
-}
-string toDate() {
-
-	string y = img2chi("y.png");
-	string m = img2chi("m.png");
-	string d = img2chi("d.png");
-
-	return cleanString(y + "-" + m + "-" + d);
-}
 void TradeMark::showMessage() {
 
-	if (!redo) {
+//	if (!redo) {
 		showMessageFile();
 		return;
-	}
+//	}
 
-	string str = fileName();
-	ofstream out;
-	out.open(str.c_str(), ios::out);
+	//string str = fileName();
+	//ofstream out;
+	//out.open(str.c_str(), ios::out);
 
-	{	//number
-		string str = imageNameC(0);
-		string content = cleanString(img2chi(str));
-		e_number->setText(QString(content.c_str()));
-		out << content << endl;
-	}
+	//{	//number
+	//	string str = imageNameC(0);
+	//	string content = cleanString(img2chi(str));
+	//	e_number->setText(QString(content.c_str()));
+	//	out << content << endl;
+	//}
 
-	{	//date
-		string str = imageNameC(1);
-		hi.cutDate(str);
-		string content = toDate();
-		e_date->setText(QString(content.c_str()));
-		out << content << endl;
-	}
+	//{	//date
+	//	string str = imageNameC(1);
+	//	hi.cutDate(str);
+	//	string content = toDate();
+	//	e_date->setText(QString(content.c_str()));
+	//	out << content << endl;
+	//}
 
-	{	//logo
-		String str = imageName(8);
-		QImage *image = new QImage(QString(str.c_str()));
-		int w = image->width();
-		int h = image->height();
-		if (150.0 / w * h > 150) {
-			w = int(150.0 / h * w);
-			h = 150;
-		}
-		else {
-			h = int(150.0 / w * h);
-			w = 150;
-		}
-		*image = image->scaled(w, h);
-		l_logoImage->setPixmap(QPixmap::fromImage(*image));
-		l_logoImage->show();
-	}
-	{	//class
-		string str = imageNameC(4);
-		string str0 = imageNameC(40);
-		string content = cleanString(img2chi(str0));
-		e_classNum->setText(QString(content.c_str()));
-		out << content << endl;
+	//{	//logo
+	//	String str = imageName(8);
+	//	QImage *image = new QImage(QString(str.c_str()));
+	//	int w = image->width();
+	//	int h = image->height();
+	//	if (150.0 / w * h > 150) {
+	//		w = int(150.0 / h * w);
+	//		h = 150;
+	//	}
+	//	else {
+	//		h = int(150.0 / w * h);
+	//		w = 150;
+	//	}
+	//	*image = image->scaled(w, h);
+	//	l_logoImage->setPixmap(QPixmap::fromImage(*image));
+	//	l_logoImage->show();
+	//}
+	//{	//class
+	//	string str = imageNameC(4);
+	//	string str0 = imageNameC(40);
+	//	string content = cleanString(img2chi(str0));
+	//	e_classNum->setText(QString(content.c_str()));
+	//	out << content << endl;
 
-		content = cleanString(img2chi(str));
-		e_class->setText(QString(content.c_str()));
-		out << content << endl;
-	}
-	{	//applicant
-		string str = imageNameC(5);
-		string content = cleanString(img2chi(str));
-		e_applicant->setText(QString(content.c_str()));
-		out << content << endl;
-	}
-	{	//address
-		string str = imageNameC(6);
-		string content = cleanString(img2chi(str));
-		e_address->setText(QString(content.c_str()));
-		out << content << endl;
-	}
-	{	//agency
-		string str = imageNameC(7);
-		string content = cleanString(img2chi(str));
-		e_agency->setText(QString(content.c_str()));
-		out << content << endl;
-	}
-	{	//priority
-		string str = imageNameC(8);
-		if (hi.cutDate(str)) {
-			string content = toDate();
-			e_priority->setText(QString(content.c_str()));
-			out << content << endl;
-		}
-	}
+	//	content = cleanString(img2chi(str));
+	//	e_class->setText(QString(content.c_str()));
+	//	out << content << endl;
+	//}
+	//{	//applicant
+	//	string str = imageNameC(5);
+	//	string content = cleanString(img2chi(str));
+	//	e_applicant->setText(QString(content.c_str()));
+	//	out << content << endl;
+	//}
+	//{	//address
+	//	string str = imageNameC(6);
+	//	string content = cleanString(img2chi(str));
+	//	e_address->setText(QString(content.c_str()));
+	//	out << content << endl;
+	//}
+	//{	//agency
+	//	string str = imageNameC(7);
+	//	string content = cleanString(img2chi(str));
+	//	e_agency->setText(QString(content.c_str()));
+	//	out << content << endl;
+	//}
+	//{	//priority
+	//	string str = imageNameC(8);
+	//	if (hi.cutDate(str)) {
+	//		string content = toDate();
+	//		e_priority->setText(QString(content.c_str()));
+	//		out << content << endl;
+	//	}
+	//}
 
-	out.close();
+	//out.close();
 
 }
 void TradeMark::showMessageFile() {
